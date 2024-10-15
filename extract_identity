@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Function to read input until a specific header is found
+read_until_header() {
+    local header="$1"
+    local line=""
+    while [[ "$line" != *"$header"* ]]; do
+        read line
+    done
+}
+
+# Main script execution
+if [[ "$1" == "--mrsigner" ]]; then
+    searched_header="mrsigner->value"
+    output_header="MRSIGNER"
+else
+    searched_header="enclave_hash.m"
+    output_header="MRENCLAVE"
+fi
+
+# Read until the searched header is found
+read_until_header "$searched_header"
+
+# Read the next line and collect values
+value=""
+while true; do
+    read line
+    if [[ "$line" == 0x* ]]; then
+        value+=$(echo "$line" | tr -d '0x' | xargs | tr -d ' ')
+    else
+        break
+    fi
+done
+
+# Print the result
+echo "$output_header: $value"
